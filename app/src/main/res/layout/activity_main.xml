@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -11,9 +12,7 @@
         android:id="@+id/phone_number_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_margin="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -30,9 +29,8 @@
         android:id="@+id/message_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/phone_number_layout">
@@ -43,7 +41,9 @@
             android:layout_height="wrap_content"
             android:gravity="top"
             android:hint="Message"
-            android:lines="5" />
+            android:inputType="textMultiLine|textCapSentences"
+            android:minLines="3"
+            android:maxLines="5" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <RadioGroup
@@ -58,14 +58,15 @@
 
         <RadioButton
             android:id="@+id/rsa_button"
-            android:layout_width="97dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
+            android:paddingEnd="16dp"
             android:text="RSA" />
 
         <RadioButton
             android:id="@+id/ecc_button"
-            android:layout_width="101dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ECC" />
     </RadioGroup>
@@ -75,6 +76,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
+        android:minHeight="48dp"
         app:layout_constraintBottom_toBottomOf="@+id/algorithm_selector"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/algorithm_selector" />
@@ -86,7 +88,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:text="Encrypt &amp; Send"
+        android:text="Encrypt"
         app:layout_constraintEnd_toStartOf="@+id/decrypt_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/algorithm_selector" />
@@ -103,23 +105,24 @@
         app:layout_constraintStart_toEndOf="@+id/encrypt_button"
         app:layout_constraintTop_toTopOf="@+id/encrypt_button" />
 
-    <TextView
-        android:id="@+id/log_view"
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_margin="16dp"
         android:background="@android:color/darker_gray"
-        android:padding="8dp"
-        android:scrollbars="vertical"
-        android:text="Logs..."
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/encrypt_button" />
+        app:layout_constraintTop_toBottomOf="@+id/encrypt_button">
+
+        <TextView
+            android:id="@+id/log_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Logs..."
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textColor="@android:color/white" />
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
