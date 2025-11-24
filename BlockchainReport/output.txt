@@ -1,0 +1,12 @@
+--- FINAL PROJECT: Blockchain Investigation (SHA-256) ---
+[Block 1] Hash: f1da9514e156a0a52c86ed91355f0a0c5b91013bc4ad35b001a3e975ba1aa296
+[Block 2] PreviousHash: f1da9514e156a0a52c86ed91355f0a0c5b91013bc4ad35b001a3e975ba1aa296
+[Block 2] Hash:         ddd7646a8394a04e96bcdab69a632a40fdf29992704673d9f7152f91b4eb63c6
+
+--- Tamper-Evidence Test ---
+Attempting to change data in Block 1...
+[Original Block 1 Hash]: f1da9514e156a0a52c86ed91355f0a0c5b91013bc4ad35b001a3e975ba1aa296
+[Tampered Block 1 Hash]: e92962d5da5560c49ef8d5f4fad6e7c6c16c7e55b0cbd2269e1cabc320f50edf
+[Block 2 PreviousHash]:  f1da9514e156a0a52c86ed91355f0a0c5b91013bc4ad35b001a3e975ba1aa296
+
+RESULT: The chain is BROKEN. Block 2 points to a hash that no longer exists.
