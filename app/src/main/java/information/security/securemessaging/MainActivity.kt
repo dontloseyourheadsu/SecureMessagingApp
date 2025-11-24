@@ -169,8 +169,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun performDecryption() {
-        if (encryptedMessage == null) {
-            Toast.makeText(this, "No encrypted message found", Toast.LENGTH_SHORT).show()
+        // 1. Get the text currently on the screen
+        val textToDecrypt = binding.messageField.text.toString().trim()
+
+        if (textToDecrypt.isEmpty()) {
+            Toast.makeText(this, "Paste encrypted text first", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 2. Ensure keys exist
+        if (binding.rsaButton.isChecked && rsaKeyPair == null) {
+            Toast.makeText(this, "Generate keys first!", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -178,21 +187,25 @@ class MainActivity : AppCompatActivity() {
             val startTime = System.nanoTime()
             val decryptedText: String
 
+            // 3. Decrypt the text from the screen, NOT the internal variable
             if (binding.rsaButton.isChecked) {
-                decryptedText = RsaUtils.decrypt(encryptedMessage!!, rsaKeyPair!!.private)
+                decryptedText = RsaUtils.decrypt(textToDecrypt, rsaKeyPair!!.private)
             } else {
-                decryptedText = EccUtils.decrypt(encryptedMessage!!, eccKeyPair!!.public, eccKeyPair!!.private)
+                decryptedText = EccUtils.decrypt(textToDecrypt, eccKeyPair!!.public, eccKeyPair!!.private)
             }
 
             val endTime = System.nanoTime()
             val duration = (endTime - startTime) / 1_000_000.0
 
+            // 4. Update the text box with the result
+            binding.messageField.setText(decryptedText)
+
             log("--- DECRYPTION ---")
-            log("Result: $decryptedText")
-            log("Time: $duration ms") // Required for report [cite: 447]
+            log("Time: $duration ms")
 
         } catch (e: Exception) {
             log("Decryption Failed: ${e.message}")
+            Toast.makeText(this, "Decryption Failed (Wrong Key?)", Toast.LENGTH_SHORT).show()
         }
     }
 
