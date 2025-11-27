@@ -37,18 +37,42 @@ class EccUtilsTest {
     }
 
     @Test
-    fun test_ECC_performance_logging() {
-        // This test is just to generate a log entry for your report data
-        val keyPair = EccUtils.generateKeyPair(256)
-        val msg = "Performance test message"
+    fun test_ECC_Performance_Evaluation() {
+        val keySizes = listOf(256, 384, 521)
+        // ECC uses hybrid encryption (AES), so it can handle large messages.
+        val messageSizes = listOf(64, 1024, 100 * 1024) // 64B, 1KB, 100KB
 
-        val start = System.nanoTime()
-        EccUtils.encrypt(msg, keyPair.public, keyPair.private)
-        val end = System.nanoTime()
+        println("--- ECC Performance Evaluation ---")
+        println(String.format("%-10s %-15s %-15s %-15s", "Key Size", "Msg Size (B)", "Time (ms)", "Time (µs)"))
 
-        val durationMs = (end - start) / 1_000_000.0
-        println("ECC 256 Encryption Time: $durationMs ms")
+        for (keySize in keySizes) {
+            // Generate key pair once per size to focus on encryption time
+            val keyPair = EccUtils.generateKeyPair(keySize)
+            
+            for (size in messageSizes) {
+                val message = generateRandomString(size)
 
-        assertTrue("Encryption should take some time", durationMs > 0)
+                val start = System.nanoTime()
+                EccUtils.encrypt(message, keyPair.public, keyPair.private)
+                val end = System.nanoTime()
+
+                val durationNs = end - start
+                val durationMs = durationNs / 1_000_000.0
+                val durationUs = durationNs / 1_000.0
+
+                println(String.format("%-10d %-15d %-15.4f %-15.2f", keySize, size, durationMs, durationUs))
+                
+                // Basic assertion to ensure it ran
+                assertTrue("Encryption should take time", durationNs > 0)
+            }
+        }
+        println("----------------------------------")
+    }
+
+    private fun generateRandomString(length: Int): String {
+        val allowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        return (1..length)
+            .map { allowedChars.random() }
+            .joinToString("")
     }
 }
