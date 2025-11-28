@@ -56,7 +56,7 @@ class RsaUtilsTest {
         val messageSizes = listOf(16, 32, 64, 100) 
 
         println("--- RSA Performance Evaluation ---")
-        println(String.format("%-10s %-15s %-15s %-15s", "Key Size", "Msg Size (B)", "Time (ms)", "Time (µs)"))
+        println(String.format("%-10s %-15s %-15s %-15s %-15s %-15s", "Key Size", "Msg Size (B)", "Enc (ms)", "Enc (µs)", "Dec (ms)", "Dec (µs)"))
 
         for (keySize in keySizes) {
             val keyPair = RsaUtils.generateKeyPair(keySize)
@@ -64,17 +64,28 @@ class RsaUtilsTest {
             for (size in messageSizes) {
                 val message = generateRandomString(size)
                 
-                val start = System.nanoTime()
-                RsaUtils.encrypt(message, keyPair.public)
-                val end = System.nanoTime()
+                // Measure Encryption
+                val startEnc = System.nanoTime()
+                val encryptedMessage = RsaUtils.encrypt(message, keyPair.public)
+                val endEnc = System.nanoTime()
 
-                val durationNs = end - start
-                val durationMs = durationNs / 1_000_000.0
-                val durationUs = durationNs / 1_000.0
+                // Measure Decryption
+                val startDec = System.nanoTime()
+                RsaUtils.decrypt(encryptedMessage, keyPair.private)
+                val endDec = System.nanoTime()
 
-                println(String.format("%-10d %-15d %-15.4f %-15.2f", keySize, size, durationMs, durationUs))
+                val encDurationNs = endEnc - startEnc
+                val encMs = encDurationNs / 1_000_000.0
+                val encUs = encDurationNs / 1_000.0
+
+                val decDurationNs = endDec - startDec
+                val decMs = decDurationNs / 1_000_000.0
+                val decUs = decDurationNs / 1_000.0
+
+                println(String.format("%-10d %-15d %-15.4f %-15.2f %-15.4f %-15.2f", keySize, size, encMs, encUs, decMs, decUs))
                 
-                assertTrue("Encryption should take time", durationNs > 0)
+                assertTrue("Encryption should take time", encDurationNs > 0)
+                assertTrue("Decryption should take time", decDurationNs > 0)
             }
         }
         println("----------------------------------")
