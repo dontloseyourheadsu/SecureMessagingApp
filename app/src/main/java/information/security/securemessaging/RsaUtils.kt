@@ -11,12 +11,25 @@ object RsaUtils {
 
     private const val TRANSFORMATION = "RSA/ECB/PKCS1Padding"
 
+    /**
+     * Generates an RSA KeyPair based on the specified key size.
+     *
+     * @param keySize The size of the key in bits (e.g., 1024, 2048, 4096).
+     * @return A KeyPair containing the public and private keys.
+     */
     fun generateKeyPair(keySize: Int): KeyPair {
         val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
         keyPairGenerator.initialize(keySize)
         return keyPairGenerator.genKeyPair()
     }
 
+    /**
+     * Encrypts a plaintext string using the RSA public key.
+     *
+     * @param plaintext The message to encrypt.
+     * @param publicKey The RSA public key.
+     * @return The Base64 encoded encrypted string.
+     */
     fun encrypt(plaintext: String, publicKey: PublicKey): String {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, publicKey)
@@ -28,6 +41,13 @@ object RsaUtils {
         return Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
     }
 
+    /**
+     * Decrypts an encrypted string using the RSA private key.
+     *
+     * @param encryptedText The Base64 encoded encrypted message.
+     * @param privateKey The RSA private key.
+     * @return The decrypted plaintext string.
+     */
     fun decrypt(encryptedText: String, privateKey: PrivateKey): String {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.DECRYPT_MODE, privateKey)
