@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RSA vs ECC: SMS Security Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+    <style>
+      :root {
+        --primary: #2c3e50;
+        --accent: #3498db;
+        --rsa-color: #ff6384;
+        --ecc-color: #36a2eb;
+        --bg: #f8f9fa;
+      }
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg);
+        color: #333;
+        overflow-x: hidden;
+      }
+      nav {
+        background: var(--primary);
+        color: white;
+        padding: 1rem;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .container {
+        max-width: 1000px;
+        margin: 80px auto 0;
+        padding: 20px;
+      }
+      section {
+        min-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-bottom: 2rem;
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        scroll-margin-top: 100px;
+      }
+      h1,
+      h2 {
+        color: var(--primary);
+      }
+      h1 {
+        font-size: 2.5rem;
+        text-align: center;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+      }
+      .math-box {
+        background: #edf2f7;
+        padding: 1.5rem;
+        border-left: 5px solid var(--accent);
+        font-size: 1.2rem;
+        margin: 1rem 0;
+      }
+      pre {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 0.9rem;
+      }
+      .code-keyword {
+        color: #cc99cd;
+      }
+      .code-function {
+        color: #6196cc;
+      }
+      .code-string {
+        color: #7ec699;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 400px;
+        width: 100%;
+      }
+      .highlight {
+        font-weight: bold;
+        color: var(--accent);
+      }
+      footer {
+        text-align: center;
+        padding: 2rem;
+        color: #777;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <section id="rsa-theory">
+        <h2>1. The RSA Algorithm</h2>
+        <div class="grid">
+          <div>
+            <p>
+              RSA relies on the computational difficulty of
+              <strong>Integer Factorization</strong>.
+            </p>
+            <div class="math-box">$$n = p \times q$$</div>
+            <p>
+              Where \(p\) and \(q\) are massive prime numbers. The security
+              comes from the fact that while multiplying is easy, factoring
+              \(n\) back into \(p\) and \(q\) is computationally infeasible for
+              large numbers.
+            </p>
+            <ul>
+              <li><strong>Encryption:</strong> \(C = M^e \pmod n\)</li>
+              <li><strong>Decryption:</strong> \(M = C^d \pmod n\)</li>
+            </ul>
+          </div>
+          <div>
+            <pre>
+<span class="code-keyword">object</span> RsaUtils {
+    <span class="code-keyword">fun</span> <span class="code-function">encrypt</span>(data: String): ByteArray {
+        <span class="code-keyword">val</span> cipher = Cipher.<span class="code-function">getInstance</span>(
+            <span class="code-string">"RSA/ECB/PKCS1Padding"</span>
+        )
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey)
+        <span class="code-keyword">return</span> cipher.doFinal(data.toByteArray())
+    }
+}
+                </pre>
+            <small
+              ><em
+                >Implementation in <code>RsaUtils.kt</code> using standard
+                PKCS1Padding.</em
+              ></small
+            >
+          </div>
+        </div>
+      </section>
+
+      <section id="ecc-theory">
+        <h2>2. Elliptic Curve Cryptography (ECC)</h2>
+        <div class="grid">
+          <div>
+            <p>
+              ECC is based on the
+              <strong>Discrete Logarithm Problem</strong> over elliptic curves.
+            </p>
+            <div class="math-box">$$y^2 = x^3 + ax + b$$</div>
+            <p>
+              It provides equivalent security to RSA with significantly smaller
+              key sizes. We implemented this using standard Android KeyStore
+              providers.
+            </p>
+            <ul>
+              <li>
+                <strong>Key Size Efficiency:</strong> 256-bit ECC ≈ 3072-bit
+                RSA.
+              </li>
+              <li>
+                <strong>Application:</strong> Ideal for mobile devices with
+                constrained battery and CPU.
+              </li>
+            </ul>
+          </div>
+          <div>
+            <pre>
+<span class="code-keyword">object</span> EccUtils {
+    <span class="code-keyword">fun</span> <span class="code-function">encrypt</span>(msg: String): ByteArray {
+        <span class="code-comment">// ECIES (Elliptic Curve Integrated 
+        // Encryption Scheme)</span>
+        <span class="code-keyword">val</span> cipher = Cipher.<span class="code-function">getInstance</span>(
+            <span class="code-string">"ECIES"</span>
+        )
+        cipher.init(Cipher.ENCRYPT_MODE, pubKey)
+        <span class="code-keyword">return</span> cipher.doFinal(msg.toByteArray())
+    }
+}
+                </pre>
+            <small
+              ><em
+                >Implementation in <code>EccUtils.kt</code> utilizing ECIES.</em
+              ></small
+            >
+          </div>
+        </div>
+      </section>
+
+      <section id="performance">
+        <h2>3. Performance Analysis (64 Byte Payload)</h2>
+        <p>
+          We measured encryption and decryption times across varying key
+          strengths (Data from <code>RsaUtilsTest</code> &
+          <code>EccUtilsTest</code>).
+        </p>
+
+        <div class="chart-container">
+          <canvas id="performanceChart"></canvas>
+        </div>
+
+        <div
+          style="
+            margin-top: 1rem;
+            background: #e8f4f8;
+            padding: 1rem;
+            border-radius: 8px;
+          "
+        >
+          <strong>Critical Observation:</strong>
+          RSA Encryption is fast (due to small public exponent \(e=65537\)), but
+          <span style="color: #d63031; font-weight: bold">RSA Decryption</span>
+          performance degrades severely at 4096 bits (~4.18ms). ECC maintains
+          stable sub-millisecond performance (~0.83ms) even at high security
+          (521-bit).
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // Data from user logs
+      const ctx = document.getElementById("performanceChart").getContext("2d");
+
+      const rsaData = {
+        enc: [0.2598, 0.1147, 0.1464], // 1024, 2048, 4096
+        dec: [0.2714, 0.6615, 4.1827],
+      };
+
+      const eccData = {
+        enc: [1.3309, 0.4401, 0.8851], // 256, 384, 521
+        dec: [0.4316, 0.3849, 0.8353],
+      };
+
+      // Register the plugin to display values on bars
+      Chart.register(ChartDataLabels);
+
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [
+            "RSA 1024 / ECC 256",
+            "RSA 2048 / ECC 384",
+            "RSA 4096 / ECC 521",
+          ],
+          datasets: [
+            {
+              label: "RSA Encryption (ms)",
+              data: rsaData.enc,
+              backgroundColor: "rgba(255, 99, 132, 0.5)",
+              borderColor: "rgba(255, 99, 132, 1)",
+              borderWidth: 1,
+              stack: "RSA",
+              datalabels: { color: "black" },
+            },
+            {
+              label: "RSA Decryption (ms)",
+              data: rsaData.dec,
+              backgroundColor: "rgba(255, 99, 132, 1)",
+              borderColor: "rgba(255, 99, 132, 1)",
+              borderWidth: 1,
+              stack: "RSA",
+              datalabels: { color: "white" },
+            },
+            {
+              label: "ECC Encryption (ms)",
+              data: eccData.enc,
+              backgroundColor: "rgba(54, 162, 235, 0.5)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+              stack: "ECC",
+              datalabels: { color: "black" },
+            },
+            {
+              label: "ECC Decryption (ms)",
+              data: eccData.dec,
+              backgroundColor: "rgba(54, 162, 235, 1)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+              stack: "ECC",
+              datalabels: { color: "white" },
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { display: true, text: "Time in Milliseconds (ms)" },
+            },
+            x: {
+              title: { display: true, text: "Equivalent Security Levels" },
+            },
+          },
+          plugins: {
+            datalabels: {
+              anchor: "center",
+              align: "center",
+              formatter: function (value) {
+                return value + " ms";
+              },
+              font: {
+                weight: "bold",
+              },
+            },
+            tooltip: {
+              callbacks: {
+                afterBody: function (context) {
+                  return "Measured on API 35 Emulator";
+                },
+              },
+            },
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
