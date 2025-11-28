@@ -9,30 +9,53 @@ import java.security.KeyPair
 @RunWith(AndroidJUnit4::class)
 class RsaUtilsTest {
 
+    /**
+     * Tests the full RSA encryption and decryption flow.
+     * Verifies that the decrypted message matches the original.
+     */
     @Test
     fun test_RSA_encryption_and_decryption() {
-        // 1. Generate Key Pair (1024 bits is fast for testing, 2048 is standard for prod)
         val keyPair: KeyPair = RsaUtils.generateKeyPair(1024)
 
-        // 2. Define a message
         val originalMessage = "This is a secret message for testing."
 
-        // 3. Encrypt the message
-        // Note: encrypt should return a Base64 String, not raw bytes, to be safe
         val encryptedMessage = RsaUtils.encrypt(originalMessage, keyPair.public)
 
         assertNotNull("Encrypted message should not be null", encryptedMessage)
         assertNotEquals("Encrypted message should not be the same as the original", originalMessage, encryptedMessage)
-        println("Encrypted Data: $encryptedMessage") // Helpful for debugging
+        println("Encrypted Data: $encryptedMessage")
 
-        // 4. Decrypt the message
         val decryptedMessage = RsaUtils.decrypt(encryptedMessage, keyPair.private)
 
         assertNotNull("Decrypted message should not be null", decryptedMessage)
 
-        // 5. Verify the decrypted message matches the original
         assertEquals("Decrypted message should match the original message", originalMessage, decryptedMessage)
     }
+
+    /**
+     * Tests RSA encryption with a larger key size (2048 bits).
+     */
+    @Test
+    fun test_with_different_key_size() {
+        val keyPair: KeyPair = RsaUtils.generateKeyPair(2048)
+        val originalMessage = "Another test with a larger key."
+
+        val encryptedMessage = RsaUtils.encrypt(originalMessage, keyPair.public)
+        val decryptedMessage = RsaUtils.decrypt(encryptedMessage, keyPair.private)
+
+        assertEquals(originalMessage, decryptedMessage)
+    }
+
+    /**
+     * Evaluates RSA performance across different key sizes and message lengths.
+     * Logs encryption and decryption times.
+     */
+    @Test
+    fun test_RSA_Performance_Evaluation() {
+        val keySizes = listOf(1024, 2048, 4096)
+        val messageSizes = listOf(16, 32, 64, 100) 
+
+        println("--- RSA Performance Evaluation ---")
 
     @Test
     fun test_with_different_key_size() {

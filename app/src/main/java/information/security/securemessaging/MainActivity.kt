@@ -52,17 +52,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Updates the spinner with available key sizes based on the selected algorithm.
+     */
     private fun updateKeySizeSpinner() {
         val keySizes = if (binding.rsaButton.isChecked) {
-            arrayOf("1024", "2048", "4096") // 4096 added for deeper comparison [cite: 577]
+            arrayOf("1024", "2048", "4096")
         } else {
-            arrayOf("256", "384", "521") // Standard ECC sizes [cite: 566]
+            arrayOf("256", "384", "521")
         }
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, keySizes)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.keySizeSelector.adapter = adapter
     }
 
+    /**
+     * Generates a KeyPair for the selected algorithm and key size.
+     * Logs the time taken for generation.
+     */
     private fun generateKeys() {
         val keySize = binding.keySizeSelector.selectedItem.toString().toInt()
         val isRsa = binding.rsaButton.isChecked
@@ -70,7 +77,7 @@ class MainActivity : AppCompatActivity() {
 
         try {
             log("Generating $algoName KeyPair ($keySize bits)...")
-            val startTime = System.nanoTime() // Nano precision for speed comparison
+            val startTime = System.nanoTime()
 
             if (isRsa) {
                 rsaKeyPair = RsaUtils.generateKeyPair(keySize)
@@ -79,8 +86,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             val endTime = System.nanoTime()
-            val duration = (endTime - startTime) / 1_000_000.0 // Convert to ms
-            log("KeyGen Success! Time: $duration ms") // Key metric for your report
+            val duration = (endTime - startTime) / 1_000_000.0
+            log("KeyGen Success! Time: $duration ms")
 
         } catch (e: Exception) {
             log("Error generating keys: ${e.message}")
@@ -110,6 +117,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Encrypts the message using the generated keys and sends it via SMS.
+     * Logs the encryption time and cipher length.
+     */
     private fun performEncryptionAndSend(phone: String, message: String) {
         val isRsa = binding.rsaButton.isChecked
 
@@ -127,8 +138,6 @@ class MainActivity : AppCompatActivity() {
                 encryptedMessage = RsaUtils.encrypt(message, rsaKeyPair!!.public)
             } else {
                 // ECC Encryption (Hybrid)
-                // Note: In real life you use the OTHER person's public key.
-                // Here we use our own pair to simulate the math performance.
                 encryptedMessage = EccUtils.encrypt(message, eccKeyPair!!.public, eccKeyPair!!.private)
             }
 
@@ -136,7 +145,7 @@ class MainActivity : AppCompatActivity() {
             val duration = (endTime - startTime) / 1_000_000.0
 
             log("--- ENCRYPTION (${if (isRsa) "RSA" else "ECC"}) ---")
-            log("Time: $duration ms") // Required for report comparison [cite: 460]
+            log("Time: $duration ms")
             log("Cipher Length: ${encryptedMessage!!.length} chars")
 
             // SEND SMS LOGIC
@@ -151,10 +160,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Sends the encrypted message via SMS.
+     * Handles multipart messages for long ciphertexts.
+     */
     private fun sendSms(phoneNumber: String, message: String) {
         try {
             val smsManager = SmsManager.getDefault()
-            // RSA encryption increases size significantly (e.g. 1024 bit key -> 172 chars) [cite: 182]
             // Standard SMS is 160 chars. We MUST use multipart.
             val parts = smsManager.divideMessage(message)
 

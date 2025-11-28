@@ -14,7 +14,12 @@ import javax.crypto.spec.SecretKeySpec
 
 object EccUtils {
 
-    // ECC is usually faster and uses smaller keys than RSA for same security [cite: 456]
+    /**
+     * Generates an Elliptic Curve KeyPair based on the specified key size.
+     *
+     * @param keySize The size of the key in bits (256, 384, or 521).
+     * @return A KeyPair containing the public and private keys.
+     */
     fun generateKeyPair(keySize: Int): KeyPair {
         val kpg = KeyPairGenerator.getInstance("EC")
         // Mapping bits to standard curve names
@@ -28,9 +33,15 @@ object EccUtils {
         return kpg.generateKeyPair()
     }
 
-    // Hybrid Encryption: ECDH (Key Agreement) -> AES
-    // In a real scenario, you need the Recipient's Public Key.
-    // For this local simulation, we are using the local key pair to demonstrate the math speed.
+    /**
+     * Encrypts a message using Hybrid Encryption (ECDH + AES).
+     * Generates a shared secret using the sender's private key and receiver's public key.
+     *
+     * @param msg The plaintext message to encrypt.
+     * @param publicKey The public key of the recipient (or self for testing).
+     * @param privateKey The private key of the sender.
+     * @return The Base64 encoded encrypted string.
+     */
     fun encrypt(msg: String, publicKey: PublicKey, privateKey: PrivateKey): String {
         val secretKey = generateSharedSecret(privateKey, publicKey)
 
@@ -41,6 +52,15 @@ object EccUtils {
         return Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
     }
 
+    /**
+     * Decrypts a message using Hybrid Encryption (ECDH + AES).
+     * Reconstructs the shared secret to decrypt the message.
+     *
+     * @param encryptedMsg The Base64 encoded encrypted message.
+     * @param publicKey The public key of the sender (or self for testing).
+     * @param privateKey The private key of the recipient.
+     * @return The decrypted plaintext string.
+     */
     fun decrypt(encryptedMsg: String, publicKey: PublicKey, privateKey: PrivateKey): String {
         val secretKey = generateSharedSecret(privateKey, publicKey)
 
